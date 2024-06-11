@@ -1,47 +1,69 @@
 # curl-http3
-[![](https://img.shields.io/docker/pulls/ymuski/curl-http3?style=flat-square)](https://hub.docker.com/r/ymuski/curl-http3)
 
-Docker image of `curl` compiled with  `BoringSSL` and `quiche/0.17.2` for **HTTP3 support**, `httpstat` for visualization.
-
-Link for [curl + http3 manual](https://github.com/curl/curl/blob/master/docs/HTTP3.md#quiche-version)
+An http3 aware curl by various libraries
 
 ## Usage
+XXX: quiche quictls gnutls openssl wolfssl
 
-`docker run -it --rm ymuski/curl-http3 curl -V`
+`docker run -it --rm smbd/curl-http3-XXX curl -V`
 ```
-curl 8.1.2-DEV (x86_64-pc-linux-gnu) libcurl/8.1.2-DEV BoringSSL quiche/0.17.2
+curl 8.8.0-DEV (x86_64-pc-linux-gnu) libcurl/8.8.0-DEV BoringSSL zlib/1.2.13 nghttp2/1.52.0 quiche/0.21.0
 Release-Date: [unreleased]
-Protocols: dict file ftp ftps gopher gophers http https imap imaps mqtt pop3 pop3s rtsp smb smbs smtp smtps telnet tftp
-Features: alt-svc AsynchDNS HSTS HTTP3 HTTPS-proxy IPv6 Largefile NTLM NTLM_WB SSL threadsafe UnixSockets
+Protocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns mqtt pop3 pop3s rtsp smb smbs smtp smtps telnet tftp
+Features: alt-svc AsynchDNS HSTS HTTP2 HTTP3 HTTPS-proxy IPv6 Largefile libz NTLM SSL threadsafe UnixSockets
 ```
 
-
-`docker run -it --rm ymuski/curl-http3 curl -IL https://blog.cloudflare.com --http3`
-
-`docker run -it --rm ymuski/curl-http3 curl -IL https://yurets.pro --http3`
-
+`docker run -it --rm smbd/curl-http3-XXX curl --http3-only -ILv https://127.0.0.1/`
 ```
-
-HTTP/3 200
-date: Sun, 28 May 2023 19:03:00 GMT
+*   Trying 127.0.0.1:443...
+* Server certificate:
+*  subject: CN=41d5abdd724f
+*  start date: Jun 10 11:34:01 2024 GMT
+*  expire date: Jun  8 11:34:01 2034 GMT
+*  issuer: CN=41d5abdd724f
+*  SSL certificate verify result: self signed certificate (18), continuing anyway.
+* Connected to 127.0.0.1 (127.0.0.1) port 443
+* using HTTP/3
+* [HTTP/3] [0] OPENED stream for https://127.0.0.1:443/
+* [HTTP/3] [0] [:method: HEAD]
+* [HTTP/3] [0] [:scheme: https]
+* [HTTP/3] [0] [:authority: 127.0.0.1:443]
+* [HTTP/3] [0] [:path: /]
+* [HTTP/3] [0] [user-agent: curl/8.8.0-DEV]
+* [HTTP/3] [0] [accept: */*]
+> HEAD / HTTP/3
+> Host: 127.0.0.1:443
+> User-Agent: curl/8.8.0-DEV
+> Accept: */*
+> 
+* Request completely sent off
+< HTTP/3 200 
+HTTP/3 200 
+< server: nginx/1.27.0
+server: nginx/1.27.0
+< date: Tue, 11 Jun 2024 14:00:21 GMT
+date: Tue, 11 Jun 2024 14:00:21 GMT
+< content-type: text/html
 content-type: text/html
-last-modified: Sun, 26 Sep 2021 16:14:14 GMT
-strict-transport-security: max-age=15552000; includeSubDomains; preload
-cf-cache-status: DYNAMIC
-report-to: {"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=0ahatt6rf%2FLHIouteXEJEQ3KOBYsfdCSbpsCotGOuaWESHJYJBrd4E6yRbUhFiLuQQ%2BsNmRujvr2A48QTpUa5BbI5iHWBNVVOCdpPaDdqqZkEh%2BQxKssoggYjY4Q"}],"group":"cf-nel","max_age":604800}
-nel: {"success_fraction":0,"report_to":"cf-nel","max_age":604800}
-x-content-type-options: nosniff
-server: cloudflare
-cf-ray: 7ce8c1510e3295a6-TBS
+< content-length: 615
+content-length: 615
+< last-modified: Tue, 28 May 2024 13:22:30 GMT
+last-modified: Tue, 28 May 2024 13:22:30 GMT
+< etag: "6655da96-267"
+etag: "6655da96-267"
+< alt-svc: h3=":443"; ma=86400
 alt-svc: h3=":443"; ma=86400
+< accept-ranges: bytes
+accept-ranges: bytes
+< 
 
 ```
 
 ### httpstat support
 
-`docker run -it --rm ymuski/curl-http3 ./httpstat.sh -ILv https://blog.cloudflare.com --http3`
+`docker run -it --rm smbd/curl-http3-XXX httpstat.sh -ILv https://blog.cloudflare.com --http3`
 
-`docker run -it --rm ymuski/curl-http3 ./httpstat.sh -ILv https://yurets.pro --http3`
+`docker run -it --rm smbd/curl-http3-XXX httpstat.sh -ILv https://yurets.pro --http3`
 
 ![](httpstat.png?raw=true "HTTPSTAT H3")
 
@@ -49,9 +71,6 @@ alt-svc: h3=":443"; ma=86400
 ## Build
 
 ```
-docker buildx build --platform linux/amd64  -t ymuski/curl-http3:latest -t ymuski/curl-http3:8.1.2 . --push
-
-# quiche fails to compile for arm
-docker buildx build --platform linux/arm,linux/arm64,linux/amd64  -t ymuski/curl-http3:latest -t ymuski/curl-http3:8.1.2 . --push
+docker build  -t curl-http3-XXX:latest -f Dockerfile.XXX .
 
 ```
