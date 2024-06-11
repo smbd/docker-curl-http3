@@ -36,7 +36,7 @@ RUN strip /debian/usr/local/bin/* /opt/quiche/target/release/quiche-* || :
 FROM debian:12-slim
 
 LABEL maintainer="Mitsuru Shimamura <smbd.jp@gmail.com>" \
-      org.opencontainers.image.title="smbd/curl-https-quiche" \
+      org.opencontainers.image.title="smbd/curl-http3-quiche" \
       org.opencontainers.image.version=${QUICHE_VERSION} \
       org.opencontainers.image.authors="Mitsuru Shimamura" \
       org.opencontainers.image.vendor="Mitsuru Shimamura" \
@@ -58,4 +58,4 @@ RUN ldconfig
 # add httpstat script
 RUN /usr/local/bin/curl -s https://raw.githubusercontent.com/b4b4r07/httpstat/master/httpstat.sh >httpstat.sh && chmod +x httpstat.sh
 
-CMD ["curl"]
+CMD ["/usr/local/bin/curl"]
