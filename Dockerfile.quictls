@@ -49,7 +49,7 @@ LABEL maintainer="Mitsuru Shimamura <smbd.jp@gmail.com>" \
       org.opencontainers.image.url="https://github.com/smbd/docker-curl-http3" \
       org.opencontainers.image.source="https://github.com/smbd/docker-curl-http3/Dockerfile.quictls"
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libnghttp2-14 zlib1g && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libnghttp2-14 zlib1g && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local/ /usr/local/
 

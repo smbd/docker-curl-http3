@@ -46,7 +46,7 @@ LABEL maintainer="Mitsuru Shimamura <smbd.jp@gmail.com>" \
       org.opencontainers.image.url="https://github.com/smbd/docker-curl-http3" \
       org.opencontainers.image.source="https://github.com/smbd/docker-curl-http3/Dockerfile.quiche"
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libnghttp2-14 zlib1g && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libnghttp2-14 zlib1g && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /debian/usr/local/ /usr/local/
 COPY --from=builder /opt/quiche/target/release/libquiche.so /usr/local/lib
