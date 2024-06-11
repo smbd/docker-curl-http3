@@ -31,6 +31,7 @@ RUN git clone --depth 1 -b $CURL_VERSION https://github.com/curl/curl \
   && ./configure LDFLAGS="-Wl,-rpath,/opt/quiche/target/release" --with-openssl=/opt/quiche/quiche/deps/boringssl/src --with-quiche=/opt/quiche/target/release --with-nghttp2 --with-zlib \
   && make && make DESTDIR="/debian/" install
 
+RUN rm -rf /debian/usr/local/share /debian/usr/local/include
 RUN strip /debian/usr/local/bin/* /opt/quiche/target/release/quiche-* || :
 
 FROM debian:12-slim
