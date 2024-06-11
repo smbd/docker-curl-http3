@@ -37,7 +37,7 @@ RUN git clone --depth 1 -b $CURL_TAG https://github.com/curl/curl \
   && make && make install
 
 RUN rm -rf /usr/local/share /usr/local/include
-RUN strip /usr/loca/bin/* || :
+RUN strip /usr/local/bin/* || :
 
 FROM debian:12-slim
 
