@@ -1,0 +1,65 @@
+# syntax=docker/dockerfile:1.4
+
+FROM debian:12 AS builder
+
+WORKDIR /opt
+
+ARG WOLFSSL_VERSION=5.7.0
+ARG WOLFSSL_TAG=v${WOLFSSL_VERSION}-stable
+ARG NGHTTP3_TAG=v1.3.0
+ARG NGTCP2_TAG=v1.5.0
+ARG CURL_TAG=curl-8_8_0
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates build-essential git autoconf automake libtool curl libnghttp2-dev zlib1g-dev binutils
+
+# build wolfSSL
+RUN git clone --depth 1 -b $WOLFSSL_TAG https://github.com/wolfSSL/wolfssl.git \
+  && cd wolfssl && autoreconf -fi \
+  && ./configure --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains \
+  && make && make install
+
+# build nghttp3
+RUN  git clone --depth 1 -b $NGHTTP3_TAG https://github.com/ngtcp2/nghttp3 \
+  && cd nghttp3 && git submodule update --init \
+  && autoreconf -fi && ./configure --enable-lib-only \
+  && make && make install
+
+# build ngtcp2
+RUN git clone --depth 1 -b $NGTCP2_TAG https://github.com/ngtcp2/ngtcp2 \
+  && cd ngtcp2 && autoreconf -fi && ./configure --enable-lib-only --with-wolfssl \
+  && make && make install
+
+# build curl
+RUN git clone --depth 1 -b $CURL_TAG https://github.com/curl/curl \
+  && cd curl && autoreconf -fi \
+  && ./configure --with-wolfssl --with-nghttp3 --with-ngtcp2 --with-zlib \
+  && make && make install
+
+RUN rm -rf /usr/local/share /usr/local/include
+RUN strip /usr/local/bin/* || :
+
+FROM debian:12-slim
+
+LABEL maintainer="Mitsuru Shimamura <smbd.jp@gmail.com>" \
+      org.opencontainers.image.title="smbd/curl-http3-wolfssl" \
+      org.opencontainers.image.version=${WOLFSSL_VERSION} \
+      org.opencontainers.image.authors="Mitsuru Shimamura" \
+      org.opencontainers.image.vendor="Mitsuru Shimamura" \
+      org.opencontainers.image.description="http3 aware curl by wolfssl" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.url="https://github.com/smbd/docker-curl-http3" \
+      org.opencontainers.image.source="https://github.com/smbd/docker-curl-http3/Dockerfile.wolfssl"
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates libnghttp2-14 zlib1g && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/ /usr/local/
+
+WORKDIR /usr/local/bin
+
+RUN ldconfig
+
+# add httpstat script
+RUN /usr/local/bin/curl -s https://raw.githubusercontent.com/b4b4r07/httpstat/master/httpstat.sh >httpstat.sh && chmod +x httpstat.sh
+
+CMD ["/usr/local/bin/curl"]
